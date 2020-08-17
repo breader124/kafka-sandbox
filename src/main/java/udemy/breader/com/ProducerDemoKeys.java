@@ -11,7 +11,7 @@ public class ProducerDemoKeys {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Logger logger = LoggerFactory.getLogger(ProducerDemoKeys.class);
 
-        KafkaProducer<String, String> producer = KafkaSetup.setupKafka();
+        KafkaProducer<String, String> producer = KafkaSetup.setupProducer();
 
         String topic = "first_topic";
         for (int i = 0; i < 10; i++) {

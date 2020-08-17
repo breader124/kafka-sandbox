@@ -11,7 +11,7 @@ public class ProducerDemoWithCallback {
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(ProducerDemoWithCallback.class);
 
-        KafkaProducer<String, String> producer = KafkaSetup.setupKafka();
+        KafkaProducer<String, String> producer = KafkaSetup.setupProducer();
 
         IntStream iter = IntStream.range(0, 10);
         iter.forEach(i -> {
