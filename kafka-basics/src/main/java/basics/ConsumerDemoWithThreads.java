@@ -1,4 +1,4 @@
-package udemy.breader.com;
+package basics;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;

@@ -1,4 +1,4 @@
-package udemy.breader.com;
+package basics;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.Random;
-import java.util.stream.IntStream;
 
 public class ConsumerDemoSeekAssign {
     public static void main(String[] args) {
