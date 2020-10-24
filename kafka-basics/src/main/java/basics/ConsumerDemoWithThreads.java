@@ -45,7 +45,7 @@ public class ConsumerDemoWithThreads {
         public ConsumerRunnable(String groupId, String topic, CountDownLatch latch) {
             this.latch = latch;
 
-            this.consumer = KafkaSetup.setupConsumer(groupId, topic);
+            this.consumer = KafkaSetup.setupConsumer(groupId);
             consumer.subscribe(Collections.singleton(topic));
         }
 

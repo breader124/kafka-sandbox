@@ -21,7 +21,7 @@ public class KafkaSetup {
         return new KafkaProducer<>(properties);
     }
 
-    public static KafkaConsumer<String, String> setupConsumer(String groupId, String topic) {
+    public static KafkaConsumer<String, String> setupConsumer(String groupId) {
         String bootstrapServers = "127.0.0.1:9092";
 
         Properties properties = new Properties();

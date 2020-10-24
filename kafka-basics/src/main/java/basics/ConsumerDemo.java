@@ -16,7 +16,7 @@ public class ConsumerDemo {
         String groupId = "fourth-application";
         String topic = "first_topic";
 
-        KafkaConsumer<String, String> consumer = KafkaSetup.setupConsumer(groupId, topic);
+        KafkaConsumer<String, String> consumer = KafkaSetup.setupConsumer(groupId);
         consumer.subscribe(Collections.singleton(topic));
 
         // bad approach with while true, should be solved using threads
