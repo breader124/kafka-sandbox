@@ -10,6 +10,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -29,8 +31,7 @@ public class ElasticSearchConsumer {
 
     public static RestHighLevelClient createClient(String hostname, String username, String password) {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        UsernamePasswordCredentials usernamePasswordCredentials =
-                new UsernamePasswordCredentials(username, password);
+        UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
         credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
 
         RestClientBuilder builder = RestClient.builder(new HttpHost(hostname, 443, "https"))
@@ -51,6 +52,8 @@ public class ElasticSearchConsumer {
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Collections.singletonList(topic));
@@ -65,19 +68,29 @@ public class ElasticSearchConsumer {
 
         consumer.subscribe(Collections.singletonList("twitter_tweets"));
 
+        BulkRequest bulkRequest = new BulkRequest();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+            int recordCounter = records.count();
+            logger.info("Received: " + recordCounter + " records");
+
             for (ConsumerRecord<String, String> record : records) {
                 String tweetJson = record.value();
+                String idempotentId = record.topic() + "_" + record.partition() + "_" + record.offset();
 
                 IndexRequest request = new IndexRequest("twitter-tweets");
+                request.id(idempotentId);
                 request.source(tweetJson, XContentType.JSON);
 
-                IndexResponse response = client.index(request, RequestOptions.DEFAULT);
+                bulkRequest.add(request);
+            }
 
-                String id = response.getId();
-                logger.info(id);
+            if (recordCounter > 0) {
+                BulkResponse bulkItemResponses = client.bulk(bulkRequest, RequestOptions.DEFAULT);
 
+                logger.info("Commiting offsets...");
+                consumer.commitSync();
+                logger.info("Offsets have benn commited");
                 Thread.sleep(1000);
             }
         }
