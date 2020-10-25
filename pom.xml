@@ -24,6 +24,7 @@
         <module>kafka-basics</module>
         <module>kafka-twitter</module>
         <module>kafka-consumer-elasticsearch</module>
+        <module>kafka-stream-filter-tweets</module>
     </modules>
 
     <dependencies>

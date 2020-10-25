@@ -13,7 +13,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -42,7 +41,7 @@ public class ElasticSearchConsumer {
         return new RestHighLevelClient(builder);
     }
 
-    public static KafkaConsumer<String, String> createConsumer(String topic) {
+    public static KafkaConsumer<String, String> createConsumer() {
         String bootstrapServers = "127.0.0.1:9092";
         String groupId = "kafka-demo-elasticsearch";
 
@@ -56,7 +55,6 @@ public class ElasticSearchConsumer {
         properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Collections.singletonList(topic));
         return new KafkaConsumer<>(properties);
     }
 
@@ -64,9 +62,9 @@ public class ElasticSearchConsumer {
         Logger logger = LoggerFactory.getLogger(ElasticSearchConsumer.class.getName());
 
         RestHighLevelClient client = createClient(args[0], args[1], args[2]);
-        KafkaConsumer<String, String> consumer = createConsumer("twitter_tweets");
+        KafkaConsumer<String, String> consumer = createConsumer();
 
-        consumer.subscribe(Collections.singletonList("twitter_tweets"));
+        consumer.subscribe(Collections.singletonList("important_tweets"));
 
         BulkRequest bulkRequest = new BulkRequest();
         while (true) {
