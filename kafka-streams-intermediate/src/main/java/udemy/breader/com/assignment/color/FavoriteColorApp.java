@@ -1,4 +1,4 @@
-package udemy.breader.com;
+package udemy.breader.com.assignment.color;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
