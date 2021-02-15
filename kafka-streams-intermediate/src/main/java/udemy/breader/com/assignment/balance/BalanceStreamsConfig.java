@@ -17,9 +17,6 @@ public class BalanceStreamsConfig {
         p.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         p.setProperty(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);
 
-        // NOT FOR PROD
-        p.setProperty(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0");
-
         return p;
     }
 }

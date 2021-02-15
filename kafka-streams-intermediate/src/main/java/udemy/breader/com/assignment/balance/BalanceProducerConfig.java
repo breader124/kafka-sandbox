@@ -30,4 +30,12 @@ public class BalanceProducerConfig {
     public static String getTopicName() {
         return "bank-balance-input";
     }
+
+    public static Integer getPublishPeriod() {
+        return 10;
+    }
+
+    public static Integer getCeilBoundMoneyAmount() {
+        return 200;
+    }
 }

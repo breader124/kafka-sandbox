@@ -22,6 +22,8 @@ public class BankBalanceProducer {
     public static void main(String[] args) {
         Properties properties = BalanceProducerConfig.getProducerProperties();
         String topicName = BalanceProducerConfig.getTopicName();
+        Integer period = BalanceProducerConfig.getPublishPeriod();
+
         KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
 
         Gson gson = new Gson();
@@ -32,7 +34,7 @@ public class BankBalanceProducer {
             String transactionJson = gson.toJson(transaction);
             ProducerRecord<String, String> record = new ProducerRecord<>(topicName, transactionJson);
             producer.send(record);
-        }, 0, 6, TimeUnit.MILLISECONDS);
+        }, 0, period, TimeUnit.MILLISECONDS);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             scheduler.shutdown();
@@ -42,7 +44,7 @@ public class BankBalanceProducer {
 
     public static String getUtcTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC).minusHours(5);
         return now.format(formatter);
     }
 
@@ -51,6 +53,6 @@ public class BankBalanceProducer {
     }
 
     public static Integer nextRandomAmount() {
-        return r.nextInt(200);
+        return r.nextInt(BalanceProducerConfig.getCeilBoundMoneyAmount());
     }
 }
