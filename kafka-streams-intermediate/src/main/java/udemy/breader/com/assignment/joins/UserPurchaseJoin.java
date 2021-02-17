@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.GlobalKTable;
 import org.apache.kafka.streams.kstream.KStream;
 import udemy.breader.com.assignment.balance.Topic;
@@ -14,6 +15,13 @@ import java.util.Properties;
 public class UserPurchaseJoin {
 
     public static void main(String[] args) {
+        KafkaStreams kafkaStreamsApp = new KafkaStreams(createTopology(), StreamsConf.getStreamsConfig());
+        kafkaStreamsApp.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreamsApp::close));
+    }
+
+    public static Topology createTopology() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
         KStream<String, String> purchaseStream = streamsBuilder.stream(Topic.USER_PURCHASE.getTopicName());
@@ -25,10 +33,7 @@ public class UserPurchaseJoin {
         purchaseStream.leftJoin(userDataTable, (key, value) -> key, (data, purchase) -> data + " -> " + purchase)
                 .to(Topic.LEFT_JOINED_DATA_PURCHASE.getTopicName());
 
-        KafkaStreams kafkaStreamsApp = new KafkaStreams(streamsBuilder.build(), StreamsConf.getStreamsConfig());
-        kafkaStreamsApp.start();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreamsApp::close));
+        return streamsBuilder.build();
     }
 
     private static class StreamsConf {
