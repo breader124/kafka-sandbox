@@ -6,15 +6,15 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.*;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import udemy.breader.com.assignment.balance.Topic;
 
+import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserPurchaseJoinTest {
 
@@ -24,6 +24,10 @@ class UserPurchaseJoinTest {
     private TestInputTopic<String, String> userPurchase;
     private TestOutputTopic<String, String> innerJoinedDataPurchase;
     private TestOutputTopic<String, String> leftJoinedDataPurchase;
+
+    private final String username = "John";
+    private final String data = "Warsaw";
+    private final String purchase = "1234";
 
     @BeforeEach
     public void initEnvironment() {
@@ -69,7 +73,43 @@ class UserPurchaseJoinTest {
     }
 
     @Test
-    public void testSomething() {
-        assertTrue(true);
+    public void shouldReturnOneRecordFromInnerJoinWhenFullDataIsAvailable() {
+        // given + when
+        userData.pipeInput(username, data);
+        userPurchase.pipeInput(username, purchase);
+
+        // then
+        KeyValue<String, String> output = innerJoinedDataPurchase.readKeyValue();
+
+        assertEquals(username, output.key);
+        assertEquals(purchase + " -> " + data, output.value);
+        assertThrows(NoSuchElementException.class, () -> innerJoinedDataPurchase.readKeyValue());
+    }
+
+    @Test
+    public void shouldReturnOneRecordFromLeftJoinWhenFullDataIsAvailable() {
+        // given + when
+        userData.pipeInput(username, data);
+        userPurchase.pipeInput(username, purchase);
+
+        // then
+        KeyValue<String, String> output = leftJoinedDataPurchase.readKeyValue();
+
+        assertEquals(username, output.key);
+        assertEquals(purchase + " -> " + data, output.value);
+        assertThrows(NoSuchElementException.class, () -> leftJoinedDataPurchase.readKeyValue());
+    }
+
+    @Test
+    public void shouldNotReturnAnyRecordFromInnerJoinAndOneRecordFromLeftRecordWhenValueIsNull() {
+        // given + when
+        userData.pipeInput(username, (String) null);
+        userPurchase.pipeInput(username, purchase);
+
+        // then
+        KeyValue<String, String> leftJoinOutput = leftJoinedDataPurchase.readKeyValue();
+        assertEquals(username, leftJoinOutput.key);
+        assertEquals(purchase + " -> null", leftJoinOutput.value);
+        assertThrows(NoSuchElementException.class, () -> innerJoinedDataPurchase.readKeyValue());
     }
 }
